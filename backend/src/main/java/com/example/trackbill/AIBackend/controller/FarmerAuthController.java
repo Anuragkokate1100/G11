@@ -1,0 +1,8 @@
+package com.example.trackbill.AIBackend.controller;
+import com.example.trackbill.AIBackend.dto.*; import com.example.trackbill.AIBackend.service.FarmerAuthService; import jakarta.validation.Valid; import org.springframework.http.HttpStatus; import org.springframework.security.core.Authentication; import com.example.trackbill.AIBackend.model.Farmer; import org.springframework.web.server.ResponseStatusException; import org.springframework.http.ResponseEntity; import org.springframework.web.bind.annotation.*;
+@RestController @RequestMapping("/api/auth/farmer") public class FarmerAuthController {
+ private final FarmerAuthService service; public FarmerAuthController(FarmerAuthService s){service=s;}
+ @PostMapping("/register") public ResponseEntity<ApiResponse<FarmerAuthResponse>> register(@Valid @RequestBody FarmerRegisterRequest request){return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok("Farmer registration successful",service.register(request)));}
+ @PostMapping("/login") public ResponseEntity<ApiResponse<FarmerAuthResponse>> login(@Valid @RequestBody LoginRequest request){return ResponseEntity.ok(ApiResponse.ok("Login successful",service.login(request)));}
+ @GetMapping("/me") public ResponseEntity<ApiResponse<FarmerAuthResponse.FarmerProfile>> me(Authentication authentication){if(authentication==null||!(authentication.getPrincipal() instanceof Farmer f))throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Farmer login required");return ResponseEntity.ok(ApiResponse.ok("Farmer profile",new FarmerAuthResponse.FarmerProfile(f.getId(),f.getName(),f.getEmail(),f.getPhone(),f.getVillage(),f.getTaluka(),f.getDistrict(),f.getState(),f.getPincode())));}
+}

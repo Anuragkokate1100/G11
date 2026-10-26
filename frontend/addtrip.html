@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>TrackBill AI - Add Trip</title>
+
+    <link rel="stylesheet" href="css/addtrip.css">
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="form-card">
+
+        <div class="header">
+            <h1>🚜 Add Trip</h1>
+            <p>Enter trip details to save them to your TrackBill records.</p>
+        </div>
+
+        <form id="tripForm">
+
+            <!-- Sugarcane Owner -->
+            <div class="form-group">
+                <label for="sugarcaneOwnerName">
+                    Sugarcane Owner Name
+                </label>
+
+                <input
+                    type="text"
+                    id="sugarcaneOwnerName"
+                    name="sugarcaneOwnerName"
+                    placeholder="Enter sugarcane owner name"
+                    required
+                    minlength="2"
+                    maxlength="150"
+                >
+            </div>
+
+
+            <!-- Weight -->
+            <div class="form-group">
+                <label for="weight">
+                    Sugarcane Weight (Ton)
+                </label>
+
+                <input
+                    type="number"
+                    id="weight"
+                    name="weight"
+                    placeholder="Enter weight"
+                    min="0.01"
+                    step="0.01"
+                    required
+                >
+            </div>
+
+
+            <!-- Diesel -->
+            <div class="form-group">
+                <label for="dieselRequired">
+                    Diesel Required (Litres)
+                </label>
+
+                <input
+                    type="number"
+                    id="dieselRequired"
+                    name="dieselRequired"
+                    placeholder="Enter diesel required"
+                    min="0"
+                    step="0.01"
+                    required
+                >
+            </div>
+
+
+            <!-- Mill -->
+            <div class="form-group">
+                <label for="millName">
+                    Sugar Mill Name
+                </label>
+
+                <input
+                    type="text"
+                    id="millName"
+                    name="millName"
+                    placeholder="Enter sugar mill name"
+                    required
+                >
+            </div>
+
+
+            <!-- Date -->
+            <div class="form-group">
+                <label for="tripDate">
+                    Trip Date
+                </label>
+
+                <input
+                    type="date"
+                    id="tripDate"
+                    name="tripDate"
+                    required
+                >
+            </div>
+
+
+            <!-- Tractor Number -->
+            <div class="form-group">
+                <label for="tractorNumber">
+                    Tractor Number
+                </label>
+
+                <input
+                    type="text"
+                    id="tractorNumber"
+                    name="tractorNumber"
+                    placeholder="Optional - automatically uses logged-in tractor"
+                >
+
+                <small>
+                    Leave blank to use your registered tractor number.
+                </small>
+            </div>
+
+
+            <!-- Buttons -->
+            <div class="buttons">
+
+                <button type="submit" id="saveBtn">
+                    Save Trip
+                </button>
+
+                <button type="reset" class="reset-btn">
+                    Clear
+                </button>
+
+            </div>
+
+        </form>
+
+        <div id="message"></div>
+
+    </div>
+
+</div>
+
+<script src="js/addtrip.js"></script>
+
+</body>
+</html>

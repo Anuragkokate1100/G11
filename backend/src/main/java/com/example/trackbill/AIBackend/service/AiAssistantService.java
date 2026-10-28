@@ -8,6 +8,7 @@ import com.example.trackbill.AIBackend.repository.*;
 import com.example.trackbill.AIBackend.util.SecurityUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -26,10 +27,14 @@ public class AiAssistantService {
     private final BillingRepository billingRepository;
     private final LabourRepository labourRepository;
 
+    // Shared RestTemplate with explicit timeouts — avoids hanging requests.
+    // Connect: 8s, Read: 15s. Gemini typically responds in 2–5s when healthy.
+    private final RestTemplate restTemplate;
+
     @Value("${gemini.api.key:}")
     private String geminiApiKey;
 
-    @Value("${gemini.api.url:https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent}")
+    @Value("${gemini.api.url:https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent}")
     private String geminiApiUrl;
 
     public AiAssistantService(TripRepository tripRepository,
@@ -40,6 +45,11 @@ public class AiAssistantService {
         this.expenseRepository = expenseRepository;
         this.billingRepository = billingRepository;
         this.labourRepository = labourRepository;
+
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(8_000);  // 8 seconds
+        factory.setReadTimeout(15_000);    // 15 seconds
+        this.restTemplate = new RestTemplate(factory);
     }
 
     public AiChatResponse chat(AiChatRequest request) {
@@ -85,7 +95,7 @@ public class AiAssistantService {
 
         if (isKeyConfigured) {
             try {
-                String reply = callGeminiApi(request.getMessage(), contextSummary);
+                String reply = callGeminiApi(request.getMessage(), contextSummary, request.getHistory());
                 return new AiChatResponse(reply, true, contextSummary);
             } catch (Exception e) {
                 // If API call fails (network/invalid key), fallback gracefully
@@ -132,22 +142,58 @@ public class AiAssistantService {
         }
     }
 
-    private String callGeminiApi(String userPrompt, String businessContext) {
-        RestTemplate restTemplate = new RestTemplate();
+    private String callGeminiApi(String userPrompt, String businessContext, List<Map<String, String>> history) {
         String url = geminiApiUrl + "?key=" + geminiApiKey;
 
         String systemPrompt = "You are TrackBill AI, an intelligent agricultural transport assistant specialized in tractor sugarcane billing, expenses, and logistics for tractor owners in Maharashtra, India. " +
                 "Answer the owner's question accurately using ONLY the following verified database metrics. Do not fabricate numbers. Format cleanly with bullet points, emojis, and Indian Rupees (₹).\n\n" +
                 "OWNER'S CURRENT VERIFIED BUSINESS DATA:\n" + businessContext;
 
-        Map<String, Object> textPart = new HashMap<>();
-        textPart.put("text", systemPrompt + "\n\nUser Question: " + userPrompt);
+        java.util.List<Map<String, Object>> contents = new java.util.ArrayList<>();
 
-        Map<String, Object> content = new HashMap<>();
-        content.put("parts", List.of(textPart));
+        // Add history if provided
+        if (history != null && !history.isEmpty()) {
+            for (Map<String, String> item : history) {
+                String role = item.get("role");
+                String text = item.get("text");
+                if (text != null && !text.isBlank()) {
+                    String geminiRole = ("assistant".equalsIgnoreCase(role) || "model".equalsIgnoreCase(role)) ? "model" : "user";
+                    Map<String, Object> part = Map.of("text", text);
+                    contents.add(Map.of("role", geminiRole, "parts", List.of(part)));
+                }
+            }
+        }
+
+        // Current user message
+        String userText = contents.isEmpty() ? (systemPrompt + "\n\nUser Question: " + userPrompt) : userPrompt;
+        Map<String, Object> currentPart = Map.of("text", userText);
+        contents.add(Map.of("role", "user", "parts", List.of(currentPart)));
+
+        // If history was present, ensure initial user turn contains system context
+        if (contents.size() > 1) {
+            Map<String, Object> firstTurn = contents.get(0);
+            if ("user".equals(firstTurn.get("role"))) {
+                List<?> firstParts = (List<?>) firstTurn.get("parts");
+                if (firstParts != null && !firstParts.isEmpty() && firstParts.get(0) instanceof Map<?, ?> partMap) {
+                    Object textObj = partMap.get("text");
+                    if (textObj instanceof String s && !s.contains("OWNER'S CURRENT VERIFIED BUSINESS DATA")) {
+                        contents.set(0, Map.of(
+                                "role", "user",
+                                "parts", List.of(Map.of("text", systemPrompt + "\n\n" + s))
+                        ));
+                    }
+                }
+            }
+        }
 
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("contents", List.of(content));
+        requestBody.put("contents", contents);
+
+        // Cap tokens to keep responses fast and focused
+        Map<String, Object> generationConfig = new HashMap<>();
+        generationConfig.put("maxOutputTokens", 800);
+        generationConfig.put("temperature", 0.4);
+        requestBody.put("generationConfig", generationConfig);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

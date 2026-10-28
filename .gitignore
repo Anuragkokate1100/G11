@@ -1,6 +1,15 @@
+target/
 backend/target/
 *.log
 .env
+.env.*
+*.env
+backend/.env
+backend/.env.*
 .idea/
 .vscode/
 .DS_Store
+
+# Local profile overrides — contain secrets, never commit
+backend/src/main/resources/application-local.properties
+application-local.properties

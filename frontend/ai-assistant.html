@@ -2,13 +2,1097 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0; url=tractorhome.html#ai">
-    <title>TrackBill AI - AI Assistant</title>
-    <script>
-        window.location.replace('tractorhome.html#ai');
-    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrackBill AI - Intelligent Assistant</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        :root {
+            --chat-bg: #0b130e;
+            --chat-card-bg: #131f17;
+            --chat-header-bg: #1a2a20;
+            --chat-bubble-ai: #17281d;
+            --chat-bubble-user: #22c55e;
+            --chat-border: #233c2a;
+            --chat-text: #e6f4ea;
+            --chat-text-muted: #8fa896;
+            --chat-accent: #a3e635;
+        }
+
+        body {
+            background-color: var(--chat-bg);
+            color: var(--chat-text);
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+        }
+
+        /* Top Bar */
+        .assistant-topbar {
+            background: var(--chat-header-bg);
+            border-bottom: 1px solid var(--chat-border);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .brand-badge {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #22c55e, #15803d);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 22px;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.35);
+        }
+
+        .brand-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: -0.3px;
+            color: #fff;
+        }
+
+        .brand-subtitle {
+            font-size: 0.75rem;
+            color: var(--chat-text-muted);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge-status-active {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            color: #4ade80;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #22c55e;
+            box-shadow: 0 0 8px #22c55e;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+
+        /* Main Container */
+        .chat-main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 16px 16px 20px 16px;
+            height: calc(100vh - 67px);
+        }
+
+        .chat-card {
+            background: var(--chat-card-bg);
+            border: 1px solid var(--chat-border);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+
+        .chat-card-header {
+            padding: 14px 20px;
+            background: rgba(26, 42, 32, 0.8);
+            border-bottom: 1px solid var(--chat-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-card-header h5 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Message Stream */
+        .chat-messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            scroll-behavior: smooth;
+        }
+
+        .chat-messages-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages-container::-webkit-scrollbar-thumb {
+            background: #233c2a;
+            border-radius: 4px;
+        }
+
+        .message-row {
+            display: flex;
+            gap: 12px;
+            max-width: 85%;
+            animation: fadeIn 0.25s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message-row.user-row {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message-row.ai-row {
+            align-self: flex-start;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            flex-shrink: 0;
+        }
+
+        .avatar-ai {
+            background: linear-gradient(135deg, #15803d, #22c55e);
+            color: #fff;
+            border: 1px solid rgba(163, 230, 53, 0.4);
+        }
+
+        .avatar-user {
+            background: #3b82f6;
+            color: #fff;
+        }
+
+        .message-content-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .message-bubble {
+            padding: 14px 18px;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+
+        .bubble-ai {
+            background: var(--chat-bubble-ai);
+            color: var(--chat-text);
+            border: 1px solid var(--chat-border);
+            border-top-left-radius: 4px;
+        }
+
+        .bubble-user {
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            color: #ffffff;
+            border-top-right-radius: 4px;
+        }
+
+        .message-meta {
+            font-size: 0.72rem;
+            color: var(--chat-text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 4px;
+        }
+
+        .user-row .message-meta {
+            justify-content: flex-end;
+        }
+
+        .btn-copy-msg {
+            background: transparent;
+            border: none;
+            color: var(--chat-text-muted);
+            cursor: pointer;
+            padding: 0;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.15s;
+        }
+
+        .btn-copy-msg:hover {
+            color: #a3e635;
+        }
+
+        /* Markdown formatting in AI bubble */
+        .bubble-ai strong {
+            color: #a3e635;
+            font-weight: 600;
+        }
+
+        .bubble-ai ul, .bubble-ai ol {
+            margin: 6px 0;
+            padding-left: 20px;
+        }
+
+        .bubble-ai li {
+            margin-bottom: 4px;
+        }
+
+        .bubble-ai code {
+            background: rgba(0,0,0,0.3);
+            color: #fcd34d;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.88em;
+        }
+
+        .bubble-ai pre {
+            background: #0b130e;
+            border: 1px solid var(--chat-border);
+            padding: 10px 14px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 8px 0;
+        }
+
+        .bubble-ai pre code {
+            background: transparent;
+            padding: 0;
+            color: #86efac;
+        }
+
+        /* Typing indicator */
+        .typing-bubble {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--chat-bubble-ai);
+            border: 1px solid var(--chat-border);
+            padding: 12px 18px;
+            border-radius: 14px;
+            border-top-left-radius: 4px;
+            color: var(--chat-text-muted);
+            font-size: 0.9rem;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dots span {
+            width: 6px;
+            height: 6px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        /* Error bubble & Retry */
+        .bubble-error {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+        }
+
+        .btn-retry-msg {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            color: #fee2e2;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-top: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-retry-msg:hover {
+            background: rgba(239, 68, 68, 0.35);
+        }
+
+        /* Suggestion Chips */
+        .chat-suggestions-bar {
+            padding: 10px 18px;
+            background: rgba(19, 31, 23, 0.95);
+            border-top: 1px solid var(--chat-border);
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .chat-suggestions-bar::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .chat-suggestions-bar::-webkit-scrollbar-thumb {
+            background: #233c2a;
+            border-radius: 2px;
+        }
+
+        .suggestion-pill {
+            background: rgba(26, 42, 32, 0.9);
+            border: 1px solid var(--chat-border);
+            color: #a3e635;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .suggestion-pill:hover {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: #22c55e;
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        /* Chat Input */
+        .chat-input-wrapper {
+            padding: 14px 18px;
+            background: var(--chat-card-bg);
+            border-top: 1px solid var(--chat-border);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .chat-textarea {
+            flex: 1;
+            background: #0b130e;
+            border: 1px solid var(--chat-border);
+            border-radius: 12px;
+            color: #fff;
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            resize: none;
+            max-height: 120px;
+            min-height: 48px;
+            line-height: 1.4;
+            transition: border-color 0.2s;
+        }
+
+        .chat-textarea:focus {
+            outline: none;
+            border-color: #22c55e;
+            box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25);
+            background: #0e1711;
+        }
+
+        .chat-textarea::placeholder {
+            color: #5c7463;
+        }
+
+        .btn-send-message {
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            border: none;
+            color: #ffffff;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
+        }
+
+        .btn-send-message:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(34, 197, 94, 0.5);
+            background: linear-gradient(135deg, #22c55e, #15803d);
+        }
+
+        .btn-send-message:disabled {
+            background: #1f3325;
+            color: #5c7463;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .input-footnote {
+            font-size: 0.74rem;
+            color: var(--chat-text-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 4px;
+        }
+
+        /* Unauthenticated Alert Banner */
+        .auth-banner {
+            background: rgba(234, 179, 8, 0.12);
+            border: 1px solid rgba(234, 179, 8, 0.4);
+            color: #fde047;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            margin: 12px 18px 0 18px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .auth-banner a {
+            color: #fff;
+            text-decoration: underline;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .chat-main-container {
+                padding: 8px;
+                height: calc(100vh - 61px);
+            }
+            .chat-card {
+                border-radius: 10px;
+            }
+            .message-row {
+                max-width: 95%;
+            }
+            .topbar-actions .btn-text {
+                display: none;
+            }
+        }
+    </style>
 </head>
-<body style="font-family: sans-serif; background: #0b130e; color: #a3e635; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0;">
-    <p>Loading TrackBill AI Assistant...</p>
+<body>
+
+    <!-- ==================== TOP NAVIGATION BAR ==================== -->
+    <header class="assistant-topbar">
+        <a href="index.html" class="brand-section">
+            <div class="brand-badge">
+                <i class="bi bi-truck-front-fill"></i>
+            </div>
+            <div>
+                <h1 class="brand-title">TrackBill AI</h1>
+                <div class="brand-subtitle" id="user-role-label">Intelligent Assistant</div>
+            </div>
+        </a>
+
+        <div class="topbar-actions">
+            <!-- Active Model Status Indicator -->
+            <div class="badge-status-active" title="Google Gemini generative model active">
+                <span class="pulse-dot"></span>
+                <span>Gemini 3.5 Flash</span>
+            </div>
+
+            <!-- New Chat / Clear Chat -->
+            <button class="btn btn-sm btn-outline-secondary text-light border-secondary" id="btn-clear-chat" title="Clear chat history">
+                <i class="bi bi-arrow-clockwise"></i> <span class="btn-text">New Chat</span>
+            </button>
+
+            <!-- Export Chat -->
+            <button class="btn btn-sm btn-outline-secondary text-light border-secondary" id="btn-export-chat" title="Export conversation as text file">
+                <i class="bi bi-download"></i> <span class="btn-text">Export</span>
+            </button>
+
+            <!-- Dashboard Link -->
+            <a href="tractorhome.html" class="btn btn-sm btn-success" id="btn-dashboard-link">
+                <i class="bi bi-speedometer2"></i> <span class="btn-text">Dashboard</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- ==================== MAIN CHAT CONTAINER ==================== -->
+    <main class="chat-main-container">
+        <div class="chat-card">
+
+            <!-- Card Header -->
+            <div class="chat-card-header">
+                <h5>
+                    <i class="bi bi-robot text-success"></i>
+                    <span id="chat-header-title">TrackBill AI Conversational Assistant</span>
+                </h5>
+                <span class="text-muted small" id="connection-status-badge">
+                    <i class="bi bi-shield-check text-success"></i> Grounded in Verified Database
+                </span>
+            </div>
+
+            <!-- Unauthenticated Notice (Shown only if not logged in) -->
+            <div class="auth-banner" id="auth-warning-banner">
+                <div>
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <span>You are not signed in. Please log in to load your personal trips, expenses, and billing data.</span>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="tractorlogin.html" class="btn btn-xs btn-outline-light">Tractor Login</a>
+                    <a href="farmerhome.html" class="btn btn-xs btn-outline-light">Farmer Login</a>
+                </div>
+            </div>
+
+            <!-- Messages Stream Area -->
+            <div class="chat-messages-container" id="chat-messages">
+                <!-- Welcome Greeting Bubble -->
+                <div class="message-row ai-row">
+                    <div class="message-avatar avatar-ai">
+                        <i class="bi bi-stars"></i>
+                    </div>
+                    <div class="message-content-wrapper">
+                        <div class="message-bubble bubble-ai">
+                            <p class="mb-1"><strong>Namaste!</strong> I am your TrackBill AI assistant powered by Google Gemini 3.5 Flash.</p>
+                            <p class="mb-1">I have direct access to your verified tractor transport, sugarcane weight tickets, diesel logs, billing, and farmer crop care data.</p>
+                            <p class="mb-0 text-muted small">You can ask me questions in English or Marathi, query current-month profitability, or tap any suggestion below.</p>
+                        </div>
+                        <div class="message-meta">
+                            <span>TrackBill AI</span> • <span class="timestamp" id="initial-timestamp">Just now</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Suggestion Chips Bar -->
+            <div class="chat-suggestions-bar" id="suggestion-chips-bar">
+                <!-- Injected dynamically based on role -->
+            </div>
+
+            <!-- Chat Input Area -->
+            <div class="chat-input-wrapper">
+                <div class="input-row">
+                    <textarea 
+                        class="chat-textarea" 
+                        id="chat-input" 
+                        rows="1" 
+                        placeholder="Ask about trips, diesel expense, sugarcane weight, billing, or crop care..."
+                    ></textarea>
+                    <button class="btn-send-message" id="btn-send" title="Send message (Enter)">
+                        <i class="bi bi-send-fill"></i>
+                    </button>
+                </div>
+                <div class="input-footnote">
+                    <span><i class="bi bi-info-circle me-1"></i> Press <strong>Enter</strong> to send, <strong>Shift + Enter</strong> for a new line</span>
+                    <span>Powered by Google Gemini 3.5 Flash</span>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- API Client Utilities -->
+    <script src="js/api.js"></script>
+
+    <script>
+        (function() {
+            // State
+            const state = {
+                role: 'TRACTOR_OWNER', // or 'FARMER'
+                conversationHistory: [], // [{ role: 'user'|'model', text: '...' }]
+                isGenerating: false,
+                lastFailedPrompt: null
+            };
+
+            // DOM Elements
+            const chatMessages = document.getElementById('chat-messages');
+            const chatInput = document.getElementById('chat-input');
+            const btnSend = document.getElementById('btn-send');
+            const btnClear = document.getElementById('btn-clear-chat');
+            const btnExport = document.getElementById('btn-export-chat');
+            const chipsBar = document.getElementById('suggestion-chips-bar');
+            const authWarning = document.getElementById('auth-warning-banner');
+            const userRoleLabel = document.getElementById('user-role-label');
+            const dashboardLink = document.getElementById('btn-dashboard-link');
+
+            // Format current time
+            function formatTime() {
+                const now = new Date();
+                return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+
+            document.getElementById('initial-timestamp').textContent = formatTime();
+
+            // Detect user authentication & role
+            function initUserContext() {
+                const token = Api.getToken();
+                const owner = Api.getOwner();
+                const farmer = Api.getFarmer();
+
+                if (!token) {
+                    authWarning.style.display = 'flex';
+                }
+
+                // If farmer is present in storage, toggle to Farmer context
+                if (farmer && farmer.id && (!owner || !owner.id)) {
+                    state.role = 'FARMER';
+                    userRoleLabel.textContent = `Farmer Portal (${farmer.fullName || farmer.village || 'Active'})`;
+                    dashboardLink.href = 'farmerhome.html';
+                    dashboardLink.innerHTML = '<i class="bi bi-speedometer2"></i> <span class="btn-text">Farmer Home</span>';
+                } else if (owner && owner.id) {
+                    state.role = 'TRACTOR_OWNER';
+                    userRoleLabel.textContent = `Tractor Portal (${owner.name || owner.tractorNumber || 'Owner'})`;
+                    dashboardLink.href = 'tractorhome.html';
+                }
+
+                renderSuggestionChips();
+                loadSavedChat();
+            }
+
+            // Render role-specific suggestions
+            function renderSuggestionChips() {
+                chipsBar.innerHTML = '';
+                const ownerSuggestions = [
+                    { icon: 'bi-fuel-pump', text: 'How much diesel did I consume this month?' },
+                    { icon: 'bi-cash-coin', text: 'What is my total net profit?' },
+                    { icon: 'bi-truck', text: 'Summarize my sugarcane trips and total tonnage.' },
+                    { icon: 'bi-buildings', text: 'Which sugar mill received the most sugarcane?' },
+                    { icon: 'bi-bar-chart', text: 'Analyze my operating expenses vs billed revenue.' }
+                ];
+
+                const farmerSuggestions = [
+                    { icon: 'bi-flower1', text: 'What is the recommended fertilizer schedule for my standing crops?' },
+                    { icon: 'bi-droplet-half', text: 'Best sugarcane irrigation practices during dry spells' },
+                    { icon: 'bi-bug', text: 'How do I prevent stem borer and red rot in sugarcane?' },
+                    { icon: 'bi-cloud-sun', text: 'Give me weather-based farming recommendations' }
+                ];
+
+                const list = (state.role === 'FARMER') ? farmerSuggestions : ownerSuggestions;
+
+                list.forEach(item => {
+                    const pill = document.createElement('div');
+                    pill.className = 'suggestion-pill';
+                    pill.innerHTML = `<i class="bi ${item.icon}"></i> <span>${item.text}</span>`;
+                    pill.onclick = () => {
+                        if (state.isGenerating) return;
+                        chatInput.value = item.text;
+                        handleSend();
+                    };
+                    chipsBar.appendChild(pill);
+                });
+            }
+
+            // Simple Markdown parser for bold, italic, bullet points, and code blocks
+            function formatMarkdown(text) {
+                if (!text) return '';
+                let safe = text
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+
+                // Code blocks ```code```
+                safe = safe.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+
+                // Inline code `code`
+                safe = safe.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+                // Bold **text**
+                safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+                // Italic *text*
+                safe = safe.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+                // Bullet points: lines starting with • or - or *
+                const lines = safe.split('\n');
+                let inList = false;
+                let html = '';
+
+                lines.forEach(line => {
+                    const trimmed = line.trim();
+                    if (trimmed.startsWith('• ') || trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+                        if (!inList) {
+                            html += '<ul>';
+                            inList = true;
+                        }
+                        html += `<li>${trimmed.substring(2)}</li>`;
+                    } else if (/^\d+\.\s/.test(trimmed)) {
+                        // Numbered list
+                        if (!inList) {
+                            html += '<ol>';
+                            inList = true;
+                        }
+                        html += `<li>${trimmed.replace(/^\d+\.\s/, '')}</li>`;
+                    } else {
+                        if (inList) {
+                            html += (html.endsWith('</li>') ? '</ul>' : '</ol>');
+                            inList = false;
+                        }
+                        if (trimmed.length > 0) {
+                            html += `<p class="mb-2">${line}</p>`;
+                        }
+                    }
+                });
+
+                if (inList) {
+                    html += '</ul>';
+                }
+
+                return html || safe;
+            }
+
+            // Scroll to bottom
+            function scrollToBottom() {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // Append User Message Bubble
+            function appendUserMessage(text) {
+                const row = document.createElement('div');
+                row.className = 'message-row user-row';
+
+                row.innerHTML = `
+                    <div class="message-avatar avatar-user">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <div class="message-content-wrapper">
+                        <div class="message-bubble bubble-user">
+                            ${text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')}
+                        </div>
+                        <div class="message-meta">
+                            <span>You</span> • <span>${formatTime()}</span>
+                        </div>
+                    </div>
+                `;
+
+                chatMessages.appendChild(row);
+                scrollToBottom();
+            }
+
+            // Append Assistant Message Bubble
+            function appendAiMessage(rawText) {
+                const row = document.createElement('div');
+                row.className = 'message-row ai-row';
+
+                const formattedHtml = formatMarkdown(rawText);
+
+                row.innerHTML = `
+                    <div class="message-avatar avatar-ai">
+                        <i class="bi bi-stars"></i>
+                    </div>
+                    <div class="message-content-wrapper">
+                        <div class="message-bubble bubble-ai">
+                            ${formattedHtml}
+                        </div>
+                        <div class="message-meta">
+                            <span>TrackBill AI</span> • <span>${formatTime()}</span>
+                            • <button class="btn-copy-msg" title="Copy reply to clipboard"><i class="bi bi-clipboard"></i> Copy</button>
+                        </div>
+                    </div>
+                `;
+
+                // Copy button handler
+                const copyBtn = row.querySelector('.btn-copy-msg');
+                if (copyBtn) {
+                    copyBtn.onclick = () => {
+                        navigator.clipboard.writeText(rawText).then(() => {
+                            copyBtn.innerHTML = '<i class="bi bi-check2 text-success"></i> Copied!';
+                            setTimeout(() => {
+                                copyBtn.innerHTML = '<i class="bi bi-clipboard"></i> Copy';
+                            }, 2000);
+                        }).catch(() => {
+                            alert('Copied message to clipboard');
+                        });
+                    };
+                }
+
+                chatMessages.appendChild(row);
+                scrollToBottom();
+            }
+
+            // Append Error Bubble with Retry
+            function appendErrorMessage(errorText, retryPrompt) {
+                const row = document.createElement('div');
+                row.className = 'message-row ai-row';
+
+                row.innerHTML = `
+                    <div class="message-avatar" style="background:#dc2626; color:#fff;">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+                    <div class="message-content-wrapper">
+                        <div class="message-bubble bubble-error">
+                            <p class="mb-1"><strong>Error retrieving response:</strong> ${errorText.replace(/</g, '&lt;')}</p>
+                            <p class="small mb-0">Please check your network connection or verify your session.</p>
+                            ${retryPrompt ? `<button class="btn-retry-msg" id="btn-retry"><i class="bi bi-arrow-counterclockwise"></i> Retry this question</button>` : ''}
+                        </div>
+                        <div class="message-meta">
+                            <span>System</span> • <span>${formatTime()}</span>
+                        </div>
+                    </div>
+                `;
+
+                const retryBtn = row.querySelector('#btn-retry');
+                if (retryBtn && retryPrompt) {
+                    retryBtn.onclick = () => {
+                        row.remove();
+                        sendQuery(retryPrompt);
+                    };
+                }
+
+                chatMessages.appendChild(row);
+                scrollToBottom();
+            }
+
+            // Show Typing Indicator
+            function showTypingIndicator() {
+                const typingRow = document.createElement('div');
+                typingRow.className = 'message-row ai-row';
+                typingRow.id = 'typing-indicator-row';
+
+                typingRow.innerHTML = `
+                    <div class="message-avatar avatar-ai">
+                        <i class="bi bi-stars"></i>
+                    </div>
+                    <div class="message-content-wrapper">
+                        <div class="typing-bubble">
+                            <div class="typing-dots">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                            <span>Analyzing verified TrackBill metrics with Gemini 3.5 Flash...</span>
+                        </div>
+                    </div>
+                `;
+
+                chatMessages.appendChild(typingRow);
+                scrollToBottom();
+            }
+
+            // Hide Typing Indicator
+            function hideTypingIndicator() {
+                const typingRow = document.getElementById('typing-indicator-row');
+                if (typingRow) {
+                    typingRow.remove();
+                }
+            }
+
+            // Auto-resize textarea
+            chatInput.addEventListener('input', () => {
+                chatInput.style.height = 'auto';
+                chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
+            });
+
+            // Handle keyboard shortcuts (Enter vs Shift+Enter)
+            chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend();
+                }
+            });
+
+            btnSend.addEventListener('click', handleSend);
+
+            function handleSend() {
+                const text = chatInput.value.trim();
+                if (!text || state.isGenerating) return;
+
+                chatInput.value = '';
+                chatInput.style.height = '48px';
+                sendQuery(text);
+            }
+
+            // Execute Query to Backend
+            async function sendQuery(promptText) {
+                state.isGenerating = true;
+                btnSend.disabled = true;
+                state.lastFailedPrompt = null;
+
+                appendUserMessage(promptText);
+                showTypingIndicator();
+
+                // Select appropriate endpoint based on role
+                const endpoint = (state.role === 'FARMER') ? '/api/farmer/ai/chat' : '/api/ai/chat';
+
+                try {
+                    // Send message with multi-turn history
+                    const payload = {
+                        message: promptText,
+                        history: state.conversationHistory.slice(-10) // Keep last 10 turns
+                    };
+
+                    const response = await Api.post(endpoint, payload);
+                    hideTypingIndicator();
+
+                    let replyText = '';
+                    if (response && response.data && response.data.reply) {
+                        replyText = response.data.reply;
+                    } else if (response && response.reply) {
+                        replyText = response.reply;
+                    } else if (typeof response === 'string') {
+                        replyText = response;
+                    } else {
+                        replyText = 'No structured response received from AI service.';
+                    }
+
+                    appendAiMessage(replyText);
+
+                    // Update history
+                    state.conversationHistory.push({ role: 'user', text: promptText });
+                    state.conversationHistory.push({ role: 'model', text: replyText });
+                    saveChatState();
+
+                } catch (err) {
+                    hideTypingIndicator();
+                    state.lastFailedPrompt = promptText;
+                    appendErrorMessage(err.message || 'Unable to connect to AI server.', promptText);
+                } finally {
+                    state.isGenerating = false;
+                    btnSend.disabled = false;
+                    chatInput.focus();
+                }
+            }
+
+            // Session persistence
+            function saveChatState() {
+                try {
+                    sessionStorage.setItem('trackbill_ai_history', JSON.stringify(state.conversationHistory));
+                } catch (_) {}
+            }
+
+            function loadSavedChat() {
+                try {
+                    const saved = sessionStorage.getItem('trackbill_ai_history');
+                    if (saved) {
+                        const history = JSON.parse(saved);
+                        if (Array.isArray(history) && history.length > 0) {
+                            state.conversationHistory = history;
+                            history.forEach(item => {
+                                if (item.role === 'user') {
+                                    appendUserMessage(item.text);
+                                } else {
+                                    appendAiMessage(item.text);
+                                }
+                            });
+                        }
+                    }
+                } catch (_) {}
+            }
+
+            // Clear chat handler
+            btnClear.addEventListener('click', () => {
+                if (state.conversationHistory.length === 0) return;
+                if (!confirm('Start a new chat and clear the current conversation history?')) return;
+
+                state.conversationHistory = [];
+                sessionStorage.removeItem('trackbill_ai_history');
+
+                // Reset chat messages to welcome message
+                chatMessages.innerHTML = `
+                    <div class="message-row ai-row">
+                        <div class="message-avatar avatar-ai">
+                            <i class="bi bi-stars"></i>
+                        </div>
+                        <div class="message-content-wrapper">
+                            <div class="message-bubble bubble-ai">
+                                <p class="mb-1"><strong>Conversation refreshed!</strong> Starting a new session with TrackBill AI & Gemini 3.5 Flash.</p>
+                                <p class="mb-0 text-muted small">Ask any question or tap a prompt chip below to begin.</p>
+                            </div>
+                            <div class="message-meta">
+                                <span>TrackBill AI</span> • <span>${formatTime()}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Export chat handler
+            btnExport.addEventListener('click', () => {
+                if (state.conversationHistory.length === 0) {
+                    alert('No conversation to export yet. Ask a question first!');
+                    return;
+                }
+
+                let transcript = `TrackBill AI Conversation Export\nDate: ${new Date().toLocaleString()}\nRole: ${state.role}\nModel: Google Gemini 3.5 Flash\n----------------------------------------\n\n`;
+
+                state.conversationHistory.forEach((turn, idx) => {
+                    const speaker = turn.role === 'user' ? 'YOU' : 'TRACKBILL AI';
+                    transcript += `[${speaker}]:\n${turn.text}\n\n`;
+                });
+
+                const blob = new Blob([transcript], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `trackbill-ai-chat-${new Date().toISOString().slice(0, 10)}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+
+            // Initialize on DOM load
+            initUserContext();
+
+        })();
+    </script>
 </body>
 </html>

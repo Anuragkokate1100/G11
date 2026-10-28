@@ -1279,8 +1279,8 @@ async function sendAiMessage() {
         aiBubble.innerHTML = replyHtml;
         messagesBox.appendChild(aiBubble);
 
-        if (res.data && res.data.isGeminiConfigured) {
-            document.getElementById('ai-status-badge').innerHTML = `<i class="bi bi-stars text-warning"></i> Powered by Gemini 1.5 Flash`;
+        if (res.data && (res.data.isGeminiConfigured || res.data.configured)) {
+            document.getElementById('ai-status-badge').innerHTML = `<i class="bi bi-stars text-warning"></i> Powered by Gemini 3.5 Flash`;
         }
     } catch (e) {
         typingBubble.remove();

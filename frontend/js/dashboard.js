@@ -1603,9 +1603,11 @@ async function sendInvoiceEmail(event) {
             ratePerTon: Number(bill.ratePerTon || 0),
             totalAmount: Number(bill.totalAmount || 0)
         });
-        status.className = 'small text-success';
-        status.textContent = result.message || `Invoice #BILL-${billId} sent to ${to}.`;
-        showToast('Invoice email sent successfully.', 'success');
+        status.className = 'small text-success fw-bold';
+        status.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> ${escapeHtml(result.message || `Invoice #BILL-${billId} sent to ${to}.`)}`;
+        showToast(result.message || 'Invoice email sent successfully.', 'success');
+        const recipientInput = document.getElementById('invoice-recipient-email');
+        if (recipientInput) recipientInput.value = '';
     } catch (error) {
         status.className = 'small text-danger';
         status.textContent = error.message || 'Unable to send invoice email. Check SMTP configuration.';

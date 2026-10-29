@@ -53,6 +53,9 @@ class TrackBillAiApplicationTests {
     private ReportService reportService;
 
     @Autowired
+    private InvoiceEmailService invoiceEmailService;
+
+    @Autowired
     private TractorOwnerRepository ownerRepository;
 
     private TractorOwner ownerA;
@@ -397,5 +400,33 @@ class TrackBillAiApplicationTests {
         assertEquals(1, report.getTotalTrips());
         assertEquals(new BigDecimal("50.00"), report.getTotalWeight());
         assertEquals(new BigDecimal("1500.00"), report.getTotalExpenses());
+    }
+
+    @Test
+    @DisplayName("Step 8 Test: Send Invoice Email Service")
+    void testSendInvoiceEmail() {
+        authenticateAs(ownerA);
+
+        InvoiceEmailRequest emailReq = new InvoiceEmailRequest();
+        emailReq.setBillId(101L);
+        emailReq.setTo("customer@example.com");
+        emailReq.setCustomerName("Ramesh Khot");
+        emailReq.setOwnerName(ownerA.getName());
+        emailReq.setTractorNumber(ownerA.getTractorNumber());
+        emailReq.setTripCount(2);
+        emailReq.setTotalWeight(new BigDecimal("55.50"));
+        emailReq.setRatePerTon(new BigDecimal("350.00"));
+        emailReq.setTotalAmount(new BigDecimal("19425.00"));
+        emailReq.setBillDate("2026-10-29");
+
+        var response = invoiceEmailService.sendInvoice(emailReq);
+        assertNotNull(response);
+        assertEquals(true, response.get("success"));
+        assertEquals("customer@example.com", response.get("recipient"));
+        assertEquals(101L, response.get("billId"));
+
+        var history = invoiceEmailService.getSentEmailHistory();
+        assertFalse(history.isEmpty());
+        assertEquals("customer@example.com", history.get(0).get("recipient"));
     }
 }
